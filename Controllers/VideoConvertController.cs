@@ -1,6 +1,7 @@
 using Amazon;
 using Amazon.MediaConvert;
 using Amazon.MediaConvert.Model;
+using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.AspNetCore.Mvc;
@@ -11,31 +12,53 @@ namespace Aws.Media.Convert.Api.Controllers
     [Route("api/video")]
     public class VideoConvertController : ControllerBase
     {
+        // private readonly IAmazonS3 _s3Client;
+        private readonly IConfiguration _config;
         private readonly IAmazonS3 _s3Client;
+        private readonly RegionEndpoint region;
+        private readonly BasicAWSCredentials credentials;
+        private readonly AwsCredentials cred;
+        private readonly AmazonS3Config regionConfig;
 
-        public VideoConvertController(IAmazonS3 s3Client){
-            _s3Client = s3Client;
+        public VideoConvertController(IConfiguration config){
+            _config = config;
+            cred = new AwsCredentials(){
+                AccessKey = _config["AwsConfiguration:AWSAccessKey"],
+                SecretKey = _config["AwsConfiguration:AWSSecretKey"]
+            };
+            regionConfig = new AmazonS3Config() 
+            {
+                RegionEndpoint = Amazon.RegionEndpoint.USEast1
+            };
+            credentials = new BasicAWSCredentials(cred.AccessKey, cred.SecretKey);
+            _s3Client = new AmazonS3Client(credentials, regionConfig);
+            region = RegionEndpoint.USEast1;
+            
         }
+
         [HttpPost]
         public async Task<ActionResult> ConvertAsync(string filename)
         {
-            RegionEndpoint region = RegionEndpoint.USEast1;
+
+            // Console.WriteLine($" AccessKeyId :{cred.AccessKey} SecretKey :{cred.SecretKey} ");
             String mediaConvertRole = "arn:aws:iam::820582469945:role/MediaConcertRoleSdk";
             String inputBucket = "s3://us-video-vod-input";
             String outputBucket = "s3://us-video-vod-output/_720X500";
             String mediaConvertEndpoint = "";
+
+            
 
 
             // var filename = args[0];
             var prefix = filename.Substring(0, filename.LastIndexOf("."));
 
             // Obtain the customer-specific MediaConvert endpoint and create MediaConvert client
-            AmazonMediaConvertClient client = new AmazonMediaConvertClient(region);
+            AmazonMediaConvertClient client = new AmazonMediaConvertClient(credentials, region);
             DescribeEndpointsRequest describeRequest = new DescribeEndpointsRequest();
             DescribeEndpointsResponse describeResponse = await client.DescribeEndpointsAsync(describeRequest);
             mediaConvertEndpoint = describeResponse.Endpoints[0].Url;
             Console.WriteLine($"MediaConvert endpoint: {mediaConvertEndpoint}");
-            client = new AmazonMediaConvertClient(new AmazonMediaConvertConfig { ServiceURL = mediaConvertEndpoint });
+            client = new AmazonMediaConvertClient(credentials, new AmazonMediaConvertConfig { ServiceURL = mediaConvertEndpoint, RegionEndpoint = region });
 
             // Create job request
             CreateJobRequest createJobRequest = new CreateJobRequest();
@@ -210,7 +233,7 @@ namespace Aws.Media.Convert.Api.Controllers
                 }
             }
 
-            return Ok();
+            return Ok("Sucessfull");
         }
 
         
