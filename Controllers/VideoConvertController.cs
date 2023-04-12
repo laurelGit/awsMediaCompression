@@ -26,7 +26,7 @@ namespace Aws.Media.Convert.Api.Controllers
                 AccessKey = _config["AwsConfiguration:AWSAccessKey"],
                 SecretKey = _config["AwsConfiguration:AWSSecretKey"]
             };
-            regionConfig = new AmazonS3Config() 
+            regionConfig = new AmazonS3Config()
             {
                 RegionEndpoint = Amazon.RegionEndpoint.USEast1
             };
@@ -58,7 +58,7 @@ namespace Aws.Media.Convert.Api.Controllers
             DescribeEndpointsResponse describeResponse = await client.DescribeEndpointsAsync(describeRequest);
             mediaConvertEndpoint = describeResponse.Endpoints[0].Url;
             Console.WriteLine($"MediaConvert endpoint: {mediaConvertEndpoint}");
-            client = new AmazonMediaConvertClient(credentials, new AmazonMediaConvertConfig { ServiceURL = mediaConvertEndpoint, RegionEndpoint = region });
+            client = new AmazonMediaConvertClient(credentials, new AmazonMediaConvertConfig { ServiceURL = mediaConvertEndpoint});
 
             // Create job request
             CreateJobRequest createJobRequest = new CreateJobRequest();
