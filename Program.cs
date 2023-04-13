@@ -14,7 +14,7 @@ builder.Services.AddSwaggerGen();
 
 // builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 
-// builder.Services.AddAWSService<IAmazonS3>();
+builder.Services.AddAWSService<IAmazonS3>();
 builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);
 builder.Services.AddHealthChecks();
 

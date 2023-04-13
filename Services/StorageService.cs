@@ -6,16 +6,13 @@ using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.S3.Transfer;
 using Aws.Media.Convert.Api.Controllers;
-using Aws.Media.Convert.Api.Controllers.model;
-using Aws.Media.Convert.Api.Controllers.service;
+using Aws.Media.Convert.Api.Model;
 
-namespace Aws.Media.Convert.Api.service
+namespace Aws.Media.Convert.Api.Services
 {
     public class StorageService : IStorageService
     {
-        public StorageService(IConfiguration config){}
-
-        public async Task<S3ResponseDto> UploadFileAysnc(S3Object obj, BasicAWSCredentials credentials, AmazonS3Config regionConfig, AmazonS3Client client)
+        public async Task<S3ResponseDto> UploadFileAysnc(CS3Object obj, BasicAWSCredentials credentials, AmazonS3Client client)
         {
             var response = new S3ResponseDto();
             try

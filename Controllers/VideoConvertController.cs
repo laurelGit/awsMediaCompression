@@ -4,7 +4,9 @@ using Amazon.MediaConvert.Model;
 using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.S3.Model;
+using Aws.Media.Convert.Api.Model;
 using Microsoft.AspNetCore.Mvc;
+using Aws.Media.Convert.Api.Services;
 
 namespace Aws.Media.Convert.Api.Controllers
 {
@@ -33,7 +35,6 @@ namespace Aws.Media.Convert.Api.Controllers
             credentials = new BasicAWSCredentials(cred.AccessKey, cred.SecretKey);
             _s3Client = new AmazonS3Client(credentials, regionConfig);
             region = RegionEndpoint.USEast1;
-            
         }
 
         [HttpPost]
@@ -45,9 +46,6 @@ namespace Aws.Media.Convert.Api.Controllers
             String inputBucket = "s3://us-video-vod-input";
             String outputBucket = "s3://us-video-vod-output/_720X500";
             String mediaConvertEndpoint = "";
-
-            
-
 
             // var filename = args[0];
             var prefix = filename.Substring(0, filename.LastIndexOf("."));
@@ -268,9 +266,34 @@ namespace Aws.Media.Convert.Api.Controllers
         [HttpGet("get-all")]
         public async Task<IActionResult> GetAllBucketAsync()
         {
+            var client = new AmazonS3Client(credentials, regionConfig);
             var data = await _s3Client.ListBucketsAsync();
             var buckets = data.Buckets.Select(b => { return b.BucketName; });
             return Ok(buckets);
+        }
+
+        [HttpPost("UploadFile")]
+        public async Task<IActionResult> UploadFile(IFormFile file)
+        {
+            // Process file
+            await using var memoryStream = new MemoryStream();
+            await file.CopyToAsync(memoryStream);
+
+            var fileExt = Path.GetExtension(file.FileName);
+            var docName = $"{Guid.NewGuid}.{fileExt}";
+            // call server
+
+            var s3Obj = new CS3Object() {
+                BucketName = "us-video-vod-output",
+                InputStream = memoryStream,
+                Name = docName
+            };
+            var client = new AmazonS3Client(credentials, regionConfig);
+            var _storageService = new StorageService();
+            var result = await _storageService.UploadFileAysnc(s3Obj, credentials, client);
+            // 
+            return Ok(result);
+
         }
 
 

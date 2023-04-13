@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Aws.Media.Convert.Api.Controllers.model
+namespace Aws.Media.Convert.Api.Model
 {
-    public class S3Object
+    public class CS3Object
     {
         public string Name {get; set;} = null!;
         public MemoryStream InputStream {get; set;} = null!;
